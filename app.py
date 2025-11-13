@@ -2,7 +2,8 @@ import streamlit as st
 import json
 import os
 from datetime import datetime
-import pypdfimport requests
+import pypdf
+import requests
 from dotenv import load_dotenv
 
 # Load environment variables
