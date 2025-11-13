@@ -8,7 +8,10 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
-HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY", "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")
+HUGGINGFACE_API_KEY = st.secrets.get("HUGGINGFACE_API_KEY", os.getenv("HUGGINGFACE_API_KEY", ""))
+if not HUGGINGFACE_API_KEY:
+    st.error("⚠️ Hugging Face API key not configured. Please set HUGGINGFACE_API_KEY in Streamlit secrets or environment variables.")
+    st.stop()
 HF_API_URL = "https://router.huggingface.co/hf-inference/models/mistral-community/Mistral-7B-Instruct-v0.1"
 
 # Page configuration
