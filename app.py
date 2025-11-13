@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY", "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")
-HF_API_URL = "https://api-inference.huggingface.co/models/mistral-community/Mistral-7B-Instruct-v0.1"
+HF_API_URL = "https://router.huggingface.co/hf-inference/models/mistral-community/Mistral-7B-Instruct-v0.1"
 
 # Page configuration
 st.set_page_config(
