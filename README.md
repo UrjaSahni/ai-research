@@ -133,6 +133,50 @@ def analyze_paper(title, text):
     return parse_response(response)
 ```
 
+### Hugging Face Integration (Current Setup):
+
+This application now uses **Hugging Face Mistral-7B** for AI-powered paper analysis.
+
+#### Setup Instructions:
+
+1. **Get your Hugging Face API key:**
+   - Visit [Hugging Face](https://huggingface.co/settings/tokens)
+   - Create a new access token (read-only is sufficient)
+   - Copy your token
+
+2. **Configure environment variables:**
+   - Create a `.env` file in the root directory (see `.env.example` for reference)
+   - Add your API key:
+     ```
+     HUGGINGFACE_API_KEY=your_token_here
+     ```
+
+3. **Run the application:**
+   ```bash
+   pip install -r requirements.txt
+   streamlit run app.py
+   ```
+
+#### Features:
+
+- **Executive Summaries**: Concise 100-150 word summaries of research papers
+- **Key Findings**: Extraction of 3-5 main findings from each paper
+- **Methodology Analysis**: 50-100 word breakdown of research methods
+- **Paper Comparison**: AI-powered identification of agreements, contradictions, and research gaps
+
+#### API Details:
+
+- **Model**: Mistral-7B-Instruct-v0.1
+- **Provider**: Hugging Face Inference API
+- **Response Time**: ~30 seconds per paper (may vary)
+- **Rate Limits**: Depends on your Hugging Face account tier
+
+#### Troubleshooting:
+
+- **Invalid API Key**: Ensure your token is correctly set in `.env` file
+- **API Timeout**: Check your internet connection and Hugging Face service status
+- **Rate Limit Exceeded**: Wait before making new requests or upgrade your HF account
+
 ## 🌐 Deployment
 
 ### Deploy on Streamlit Cloud
