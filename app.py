@@ -2,8 +2,7 @@ import streamlit as st
 import json
 import os
 from datetime import datetime
-import PyPDF2
-import requests
+import pypdfimport requests
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -65,7 +64,7 @@ def query_huggingface(prompt, max_length=512):
 # Extract PDF text
 def extract_pdf_text(pdf_file):
     try:
-        pdf_reader = PyPDF2.PdfReader(pdf_file)
+        pdf_reader = pypdf.PdfReader(pdf_file)
         text = ""
         for page in pdf_reader.pages:
             text += page.extract_text()
