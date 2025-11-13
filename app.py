@@ -55,8 +55,12 @@ def query_huggingface(prompt, max_length=512):
         if response.status_code == 200:
             result = response.json()
             if isinstance(result, list) and len(result) > 0:
-                return result[0].get('generated_text', '').strip()
-            return str(result).strip()
+                generated_text = result[0].get('generated_text', '').strip()
+                # Remove the prompt from the generated text (Mistral includes prompt in response)
+                if generated_text.startswith(prompt):
+                    generated_text = generated_text[len(prompt):].strip()
+                return generated_text if generated_text else "No response generated"
+            return "Invalid response format"
         else:
             return f"API Error: {response.status_code}"
     except Exception as e:
@@ -80,24 +84,26 @@ def analyze_paper(title, text):
     # Create prompts for different analyses
     prompts = {
         "executive_summary": f"""Provide a brief executive summary (100-150 words) of this research paper:
-        Title: {title}
-        Content: {text[:1000]}
-        Summary:""",
+Title: {title}
+Content: {text[:1000]}
+Summary:""",
         
         "key_findings": f"""List 3-5 key findings from this research paper in bullet points:
-        Title: {title}
-        Content: {text[:1000]}
-        Key Findings:""",
+Title: {title}
+Content: {text[:1000]}
+Key Findings:""",
         
         "methodology": f"""Describe the research methodology used in this paper (50-100 words):
-        Title: {title}
-        Content: {text[:1000]}
-        Methodology:"""
+Title: {title}
+Content: {text[:1000]}
+Methodology:"""
     }
     
     results = {}
     for key, prompt in prompts.items():
-        results[key] = query_huggingface(prompt, max_length=300)
+        response = query_huggingface(prompt, max_length=300)
+        # Clean up the response
+        results[key] = response.strip() if response else "N/A"
     
     return {
         "id": len(st.session_state.papers) + 1,
@@ -106,7 +112,7 @@ def analyze_paper(title, text):
         "abstract": text[:300] if text else "No content",
         "year": 2024,
         "executive_summary": results.get("executive_summary", "N/A"),
-        "key_findings": results.get("key_findings", "N/A").split('\n'),
+        "key_findings": [f.strip() for f in results.get("key_findings", "N/A").split('\n') if f.strip()],
         "methodology": results.get("methodology", "N/A"),
         "sections": [
             {"title": "Abstract", "summary": text[:200]},
@@ -126,21 +132,22 @@ def compare_papers(selected_papers):
     
     prompts = {
         "agreements": f"""Find 2-3 areas of agreement between these research papers:
-        {papers_text}
-        Agreements:""",
+{papers_text}
+Agreements:""",
         
         "contradictions": f"""Identify any contradictions or differences in these papers:
-        {papers_text}
-        Contradictions:""",
+{papers_text}
+Contradictions:""",
         
         "gaps": f"""What research gaps can be identified from these papers?
-        {papers_text}
-        Research Gaps:"""
+{papers_text}
+Research Gaps:"""
     }
     
     results = {}
     for key, prompt in prompts.items():
-        results[key] = query_huggingface(prompt, max_length=400)
+        response = query_huggingface(prompt, max_length=400)
+        results[key] = response.strip() if response else "N/A"
     
     return {
         "papers": selected_papers,
@@ -157,7 +164,7 @@ def compare_papers(selected_papers):
                 {
                     "title": "Methodological Differences",
                     "description": results.get("contradictions", "Papers use different approaches"),
-                    "conflicting_views": results.get("contradictions", "").split('\n')
+                    "conflicting_views": [v.strip() for v in results.get("contradictions", "").split('\n') if v.strip()]
                 }
             ],
             "research_gaps": [
@@ -167,7 +174,7 @@ def compare_papers(selected_papers):
                 }
             ],
             "unique_contributions": [
-                {"paper": p["title"], "contribution": p.get("executive_summary", "")[:100]}  
+                {"paper": p["title"], "contribution": p.get("executive_summary", "")[:100]} 
                 for p in selected_papers
             ]
         }
@@ -257,14 +264,14 @@ elif page == "Compare Papers":
                 with st.spinner("AI is comparing papers..."):
                     selected = [p for p in st.session_state.papers if p['title'] in selected_titles]
                     st.session_state.comparison_result = compare_papers(selected)
-                    st.success("✓ Comparison complete!")
+                st.success("✓ Comparison complete!")
         
         if st.session_state.comparison_result:
             result = st.session_state.comparison_result
             analysis = result['analysis']
             
             st.divider()
-            st.subheader("📊 AI Comparison Analysis")
+            st.subheader("📈 AI Comparison Analysis")
             
             st.write("### Papers Analyzed")
             for idx, p in enumerate(result['papers'], 1):
